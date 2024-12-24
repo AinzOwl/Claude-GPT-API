@@ -50,43 +50,36 @@ app.get('/v1/models', (req, res) => {
 });
 
 async function chatWithDuckDuckGo(req, res, messages, stream, model) {
-  const userAgent = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:123.0) Gecko/20100101 Firefox/123.0";
-  const headers = {
-    "User-Agent": userAgent,
-    "Accept": "text/event-stream",
-    "Accept-Language": "de,en-US;q=0.7,en;q=0.3",
-    "Accept-Encoding": "gzip, deflate, br",
-    "Referer": "https://duckduckgo.com/",
-    "Content-Type": "application/json",
-    "Origin": "https://duckduckgo.com",
-    "Connection": "keep-alive",
-    "Cookie": "dcm=1",
-    "Sec-Fetch-Dest": "empty",
-    "Sec-Fetch-Mode": "cors",
-    "Sec-Fetch-Site": "same-origin",
-    "Pragma": "no-cache",
-    "TE": "trailers",
-  };
-
-  const statusURL = "https://duckduckgo.com/duckchat/v1/status";
-  const chatURL = "https://duckduckgo.com/duckchat/v1/chat";
-
-  try {
-    // Get vqd_4
-    const statusResponse = await axios.get(statusURL, {
-      headers: { ...headers, "x-vqd-accept": "1" },
-    });
-    const vqd4 = statusResponse.headers['x-vqd-4'];
-
-    const payload = {
-      model: model,
-      messages: messages,
-    };
-
-    const chatResponse = await axios.post(chatURL, payload, {
-      headers: { ...headers, "x-vqd-4": vqd4 },
-      responseType: 'stream',
-    });
+	const headers = {
+	  'accept': 'text/event-stream',
+	  'accept-language': 'en',
+	  'content-type': 'application/json',
+	  'cookie': 'dcm=1; dcs=1',
+	  'origin': 'https://duckduckgo.com',
+	  'priority': 'u=1, i',
+	  'referer': 'https://duckduckgo.com/',
+	  'sec-ch-ua': '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
+	  'sec-ch-ua-mobile': '?0',
+	  'sec-ch-ua-platform': '"Windows"',
+	  'sec-fetch-dest': 'empty',
+	  'sec-fetch-mode': 'cors',
+	  'sec-fetch-site': 'same-origin',
+	  'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+	  'x-vqd-4': '4-132201320654189335102394766993669085744'
+	};
+  
+	const chatURL = "https://duckduckgo.com/duckchat/v1/chat";
+  
+	try {
+	  const payload = {
+		model: model,
+		messages: messages
+	  };
+  
+	  const chatResponse = await axios.post(chatURL, payload, {
+		headers: headers,
+		responseType: 'stream'
+	  });
 
     res.set({
       'Content-Type': 'text/event-stream',
