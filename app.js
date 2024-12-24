@@ -34,15 +34,27 @@ app.get('/v1/models', (req, res) => {
     object: "list",
     data: [
       {
-        id: "gpt-3.5-turbo-0125",
+        id: "gpt-4o-mini",
         object: "model",
-        created: 1692901427,
+        created: 1735008633,
         owned_by: "system",
       },
       {
         id: "claude-3-haiku-20240307",
         object: "model",
-        created: 1692901427,
+        created: 1735008633,
+        owned_by: "user",
+      },
+      {
+        id: "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo",
+        object: "model",
+        created: 1735008633,
+        owned_by: "user",
+      },
+      {
+        id: "mistralai/Mixtral-8x7B-Instruct-v0.1",
+        object: "model",
+        created: 1735008633,
         owned_by: "user",
       },
     ],
@@ -65,7 +77,7 @@ async function chatWithDuckDuckGo(req, res, messages, stream, model) {
 	  'sec-fetch-mode': 'cors',
 	  'sec-fetch-site': 'same-origin',
 	  'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-	  'x-vqd-4': '4-132201320654189335102394766993669085744'
+	  'x-vqd-4': '4-121019224809892646565397685978916313648'
 	};
   
 	const chatURL = "https://duckduckgo.com/duckchat/v1/chat";
