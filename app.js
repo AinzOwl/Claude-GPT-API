@@ -2,6 +2,7 @@ const express = require('express');
 const axios = require('axios');
 const bodyParser = require('body-parser');
 const { v4: uuidv4 } = require('uuid');
+const cheerio = require('cheerio');
 
 const app = express();
 app.use(bodyParser.json());
@@ -14,7 +15,6 @@ app.get('/', (req, res) => {
 
 app.post('/v1/chat/completions', async (req, res) => {
   const { model, messages, stream } = req.body;
-
   // Only support user role
   for (let message of messages) {
     if (message.role === 'system') {
@@ -60,8 +60,37 @@ app.get('/v1/models', (req, res) => {
     ],
   });
 });
+async function scrapeVqd(url) {
+  try {
+      // Make a request to the URL
+      const { data } = await axios.get(url);
 
+      // Load the HTML into cheerio
+      const $ = cheerio.load(data);
+
+      // Find the script tag that contains the vqd variable
+      const script = $('script').filter((index, el) => {
+          return $(el).text().includes('vqd');
+      }).first();
+
+      // Extract the content of the script tag
+      const scriptContent = $(script).text();
+
+      // Use a regular expression to find the vqd value
+      const match = scriptContent.match(/vqd\s*=\s*"([^"]+)"/);
+
+      if (match && match[1]) {
+          return match[1];
+      } else {
+          return null;
+      }
+  } catch (error) {
+      console.error('Error fetching the URL:', error);
+      return null;
+  }
+}
 async function chatWithDuckDuckGo(req, res, messages, stream, model) {
+  let vqd = await scrapeVqd('https://duckduckgo.com/?q=DuckDuckGo+AI+Chat&ia=chat&duckai=1');
 	const headers = {
 	  'accept': 'text/event-stream',
 	  'accept-language': 'en',
@@ -77,22 +106,20 @@ async function chatWithDuckDuckGo(req, res, messages, stream, model) {
 	  'sec-fetch-mode': 'cors',
 	  'sec-fetch-site': 'same-origin',
 	  'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-	  'x-vqd-4': '4-121019224809892646565397685978916313648'
+	  'x-vqd-4': vqd,
 	};
   
 	const chatURL = "https://duckduckgo.com/duckchat/v1/chat";
-  
 	try {
 	  const payload = {
-		model: model,
-		messages: messages
+      model: model,
+      messages: messages
 	  };
   
 	  const chatResponse = await axios.post(chatURL, payload, {
 		headers: headers,
 		responseType: 'stream'
 	  });
-
     res.set({
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache',
